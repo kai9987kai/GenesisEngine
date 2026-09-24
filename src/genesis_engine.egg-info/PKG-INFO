@@ -1,0 +1,87 @@
+Metadata-Version: 2.4
+Name: genesis-engine
+Version: 0.1.0
+Summary: A reproducible developmental artificial-life laboratory
+Requires-Python: >=3.12
+Description-Content-Type: text/markdown
+Requires-Dist: PyYAML<7,>=6.0.2
+
+# Genesis Engine
+
+A local artificial-life laboratory where a compact regulatory genome develops into a multicellular body and nervous system, then lives, learns, reproduces and evolves in a 2D ecosystem.
+
+This is the first reference release of the [project plan](docs/original-project-plan.md). The renderer is separate from the deterministic Python core. It is an abstract synthetic model for experiments, not a biological simulator or evidence of general intelligence.
+
+## Start the lab
+
+Requires **Python 3.12+**. On Windows, double-click **Launch Genesis.cmd** to open the lab. The viewer and simulation use the standard library; YAML experiment files additionally use PyYAML.
+
+For the installed command-line tools:
+
+```powershell
+python -m pip install -e .
+genesis serve --open
+```
+
+Open http://127.0.0.1:8765. The simulation advances only when the viewer requests ticks. Pause, single-step, adjust speed, select an organism, inspect its development/genome/brain/metabolism, and export/import a complete snapshot. The lab runs locally and needs no cloud account.
+
+Use one active viewer per server: browser tabs share the same live world, and pausing one tab does not stop another tab's requests. Independent experiments always create their own worlds.
+
+## Headless workflows
+
+```powershell
+genesis genome --seed 42 --output genome.json
+genesis develop genome.json --output organism.json
+genesis simulate organism.json --ticks 600 --output organism.genrun
+genesis simulate --seed 42 --population 18 --ticks 1000 --output world.genrun
+genesis replay world.genrun --ticks 100 --output continued.genrun
+genesis inspect genome.json
+genesis experiment experiments/learning.yaml --headless --output results/learning
+genesis experiment experiments/scarcity.yaml --output results/scarcity
+genesis evolve experiments/foraging.yaml --output results/foraging
+genesis compare results/learning results/scarcity
+```
+
+Use a new output directory for each experiment. Exports contain `manifest.json`, `raw.csv`, `population.csv`, `generations.csv`, `lineage.json`, `statistics.json`, `snapshots/*.genrun`, an SVG chart and `report.md`. Each raw row includes its snapshot hash. The manifest records engine/Python versions, source hashes and Git provenance when available. `compare` is descriptive; it does not manufacture a paired estimate from unrelated runs.
+
+## What is implemented
+
+- Indirect developmental genomes with regulatory, developmental, neural, metabolic and reproductive parameters; recombination and structural/parameter mutation.
+- GRN expression, local morphogen signals, cell division/differentiation and recorded embryonic history; bodies connected by springs.
+- Developmentally wired recurrent controllers, sensors, muscle actuation and separate genetic-only, Hebbian and reward-modulated learning modes.
+- Energy accounting, food regeneration, hazards, death, ecological births, controlled selection, ancestry and algorithmic species groups.
+- World, embryo, cell, regulatory-network, neural, metabolism, lineage and experiment views driven by actual model state.
+- Explicit RNG state and complete JSON snapshots for exact continuation on the same engine/Python runtime.
+- Independent control/treatment runs using paired initial seeds and paired bootstrap intervals.
+
+## Experiments and interventions
+
+```yaml
+name: learning_ablation
+seeds: {start: 1, end: 5}
+ticks: 300
+config:
+  population: 12
+  learning: hebbian
+intervention:
+  learning: none
+```
+
+Treatments are configured **before embryogenesis**. Live developmental interventions affect future embryos; they do not retroactively rewrite existing bodies. Paired initial seeds do not guarantee identical later random consumption when arms diverge. Small seed counts are useful for smoke tests and exploratory work; their confidence intervals are unstable. Claims apply only to the measured configuration.
+
+Supported CLI experiments use `control` and `intervention` arms. The plan's direct-encoding comparator is deliberately not simulated by relabeling a developmental organism: it requires a separately specified fair baseline and remains future work. Endpoint population and fitness proxies are not biological survival or intelligence measurements.
+
+In controlled mode, a generation boundary develops a new cohort. Endpoint metrics then describe newborn organisms; `generations.csv` contains the evaluated fitness and survival of each completed cohort. `experiments/gene_knockout.yaml` demonstrates growth-gene ablation before development.
+
+## Verify
+
+```powershell
+python -m unittest discover -s tests -v
+python -m compileall -q src
+```
+
+The test suite checks reproducibility, exact continuation, developmental effects, learning isolation, energy and inheritance, experiment receipts, invalid imports and local API behavior. See [model and replay boundaries](docs/model.md) and [implementation plan](docs/implementation-plan.md).
+
+## Next research stages
+
+The full vision also includes direct-vs-developmental matched-budget experiments, ablations separating brain/body evolution, richer ecological niches, 3D compilation, optional MuJoCo and PettingZoo adapters, spiking networks and external controllers. These are not implemented in v0.1. Predation, open-ended evolution and biological realism are not established claims.
