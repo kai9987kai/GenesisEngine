@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "genesis-engine"
+version = "0.1.0"
+description = "A reproducible developmental artificial-life laboratory"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = ["PyYAML>=6.0.2,<7"]
+
+[project.scripts]
+genesis = "genesis.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.data-files]
+"share/genesis/web" = ["web/*.html", "web/*.css", "web/*.js"]
