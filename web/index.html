@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0b1012" />
+    <meta
+      name="description"
+      content="Genesis Engine: a reproducible artificial-life research laboratory. Explore developmental genomes, multicellular organisms, and evolving ecosystems."
+    />
+    <title>Genesis Engine — Artificial Life Laboratory</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%230b1012'/%3E%3Cpath d='M11 9v9c0 9 18 4 18 13M29 9v9c0 9-18 4-18 13M12 12h16M13 29h14' stroke='%239dea9e' fill='none' stroke-width='3'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+    <script type="module" src="/app.js"></script>
+  </head>
+  <body>
+    <a href="#workspace" class="skip-link">Skip to workspace</a>
+    <header class="app-header">
+      <a class="brand" href="/" aria-label="Genesis Engine home"
+        ><span class="brand-mark" aria-hidden="true"
+          ><svg viewBox="0 0 32 32">
+            <path
+              d="M8 4v7c0 9 16 5 16 17M24 4v7C24 20 8 16 8 28M9 7h14M10 25h12"
+            /></svg></span
+        ><span>GENESIS<span class="brand-engine">ENGINE</span></span
+        ><span class="version">v0.1</span></a
+      >
+      <div class="header-center">
+        <span class="status-dot"></span> ARTIFICIAL LIFE LABORATORY
+      </div>
+      <div class="header-actions">
+        <button
+          id="import-button"
+          class="button ghost"
+          title="Restore an exact simulation snapshot"
+        >
+          <span aria-hidden="true">↥</span> Import</button
+        ><button
+          id="export-button"
+          class="button subtle"
+          title="Save the full state, genome, and random generator"
+        >
+          <span aria-hidden="true">↧</span> Save snapshot
+        </button>
+      </div>
+    </header>
+    <main>
+      <section class="page-heading">
+        <div>
+          <div class="eyebrow">EVOLUTION, OBSERVED.</div>
+          <h1>A world from a single cell<span>.</span></h1>
+          <p>Develop. Adapt. Evolve. Follow life as it finds its own way.</p>
+        </div>
+        <div class="run-badge">
+          <span class="status-dot" id="run-dot"></span
+          ><span id="run-status">CONNECTING</span><span class="divider"></span
+          ><span>SEED <b id="seed-label">—</b></span
+          ><button
+            id="configure-button"
+            class="icon-button"
+            aria-label="Configure simulation"
+            title="Configure simulation"
+          >
+            <svg viewBox="0 0 20 20">
+              <path d="M3 6h14M3 14h14M7 3v6M13 11v6" />
+            </svg>
+          </button>
+        </div>
+      </section>
+      <div id="error-banner" role="alert" hidden></div>
+      <section class="metrics-strip" aria-label="Live population metrics">
+        <div class="metric">
+          <span class="metric-label">Living population</span>
+          <div>
+            <strong id="metric-population">—</strong
+            ><span class="metric-unit">organisms</span
+            ><svg
+              id="spark-population"
+              class="spark"
+              viewBox="0 0 90 30"
+              aria-hidden="true"
+            ></svg>
+          </div>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Generation</span>
+          <div>
+            <strong id="metric-generation">—</strong
+            ><span class="metric-unit">current</span>
+          </div>
+        </div>
+        <div class="metric">
+          <span class="metric-label"
+            >Genomic clusters
+            <span
+              title="Clusters are a genome-distance proxy, not biological species."
+              class="info"
+              >i</span
+            ></span
+          >
+          <div>
+            <strong id="metric-species">—</strong
+            ><span class="metric-unit">distinct</span>
+          </div>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Mean energy</span>
+          <div>
+            <strong id="metric-energy">—</strong
+            ><span class="metric-unit">energy units</span
+            ><svg
+              id="spark-energy"
+              class="spark"
+              viewBox="0 0 90 30"
+              aria-hidden="true"
+            ></svg>
+          </div>
+        </div>
+      </section>
+      <section class="workspace" id="workspace" aria-label="Research workspace">
+        <nav class="view-tabs" aria-label="Research views" role="tablist">
+          <button
+            data-view="world"
+            role="tab"
+            aria-selected="true"
+            class="active"
+          >
+            <span aria-hidden="true">◉</span> World
+          </button>
+          <button data-view="development" role="tab" aria-selected="false">
+            <span aria-hidden="true">⌘</span> Development
+          </button>
+          <button data-view="genome" role="tab" aria-selected="false">
+            <span aria-hidden="true">⟐</span> Genome
+          </button>
+          <button data-view="brain" role="tab" aria-selected="false">
+            <span aria-hidden="true">⌁</span> Brain
+          </button>
+          <button data-view="metabolism" role="tab" aria-selected="false">
+            <span aria-hidden="true">ϟ</span> Metabolism
+          </button>
+          <button data-view="lineage" role="tab" aria-selected="false">
+            <span aria-hidden="true">⑂</span> Lineage
+          </button>
+          <button data-view="lab" role="tab" aria-selected="false">
+            <span aria-hidden="true">⚗</span> LabCore
+          </button>
+        </nav>
+        <div class="workspace-grid">
+          <div class="stage-shell">
+            <div class="stage-heading">
+              <div>
+                <span class="panel-kicker" id="stage-kicker"
+                  >LIVE ECOSYSTEM</span
+                >
+                <h2 id="stage-title">The reference world</h2>
+              </div>
+              <div class="stage-meta" id="stage-meta">2D CONTINUOUS SPACE</div>
+            </div>
+            <div id="stage-content" role="tabpanel" aria-label="World view">
+              <canvas
+                id="world-canvas"
+                aria-label="Live ecosystem. Select an organism from the population list to inspect it."
+              ></canvas>
+            </div>
+            <div class="playback-bar">
+              <div class="playback-actions">
+                <button id="play-button" class="button play" disabled>
+                  <span id="play-icon" aria-hidden="true">▶</span
+                  ><span id="play-label">Run simulation</span></button
+                ><button
+                  id="step-button"
+                  class="icon-button"
+                  title="Advance one tick"
+                  aria-label="Advance one tick"
+                >
+                  ▸│</button
+                ><button
+                  id="reset-button"
+                  class="icon-button"
+                  title="Restart this seed"
+                  aria-label="Restart this seed"
+                >
+                  ↻</button
+                ><span class="playback-divider"></span
+                ><label class="speed-label" for="speed">SPEED</label
+                ><select id="speed" aria-label="Simulation speed">
+                  <option value="1">1×</option>
+                  <option value="4" selected>4×</option>
+                  <option value="12">12×</option>
+                  <option value="30">30×</option>
+                </select>
+              </div>
+              <div class="clock">
+                <span class="status-dot"></span
+                ><span>TICK <b id="tick-label">000000</b></span
+                ><button
+                  id="generation-button"
+                  class="button tiny"
+                  title="Select parents and develop the next controlled generation"
+                  hidden
+                >
+                  Next generation →
+                </button>
+              </div>
+            </div>
+          </div>
+          <aside class="inspector" aria-label="Organism inspector">
+            <div class="inspector-top">
+              <span class="panel-kicker">ORGANISM INSPECTOR</span
+              ><span class="live-label" id="organism-state">LIVE</span>
+            </div>
+            <div id="inspector-content">
+              <div class="empty-state">Connecting to the reference engine…</div>
+            </div>
+            <div class="population-select">
+              <label for="organism-select">SELECT ORGANISM</label
+              ><select
+                id="organism-select"
+                aria-label="Select organism"
+              ></select>
+            </div>
+          </aside>
+        </div>
+      </section>
+      <section class="analysis-grid" aria-label="Run analytics">
+        <article class="chart-card">
+          <div class="card-heading">
+            <h2>Population dynamics</h2>
+            <span><i class="legend-line"></i> Living</span>
+          </div>
+          <div id="population-chart" class="chart-container"></div>
+          <div class="chart-footer">
+            <span>Births <b id="births">0</b></span
+            ><span>Deaths <b id="deaths">0</b></span
+            ><span class="muted">Simulation ticks</span>
+          </div>
+        </article>
+        <article class="chart-card">
+          <div class="card-heading">
+            <h2>Energy & morphology</h2>
+            <span><i class="legend-line teal"></i> Mean energy</span>
+          </div>
+          <div id="energy-chart" class="chart-container"></div>
+          <div class="chart-footer">
+            <span>Mean body <b id="mean-cells">—</b> cells</span
+            ><span class="muted">Energy units · ticks</span>
+          </div>
+        </article>
+        <article class="event-card">
+          <div class="card-heading">
+            <h2>Field notes</h2>
+            <span id="event-count">0 events</span>
+          </div>
+          <div id="events" class="event-list">
+            <p class="muted">Waiting for the first observation.</p>
+          </div>
+        </article>
+      </section>
+      <footer class="app-footer">
+        <span
+          ><span class="status-dot"></span> DETERMINISTIC 2D REFERENCE
+          ENGINE</span
+        ><span
+          >An abstract artificial-life model. Explore mechanisms; measure
+          claims.</span
+        ><span id="footer-config">GENESIS / LABCORE</span>
+      </footer>
+    </main>
+    <dialog id="config-dialog">
+      <form id="config-form">
+        <div class="dialog-heading">
+          <div>
+            <span class="eyebrow">REFERENCE WORLD</span>
+            <h2>Configure a new run</h2>
+          </div>
+          <button
+            type="button"
+            id="close-config"
+            class="icon-button"
+            aria-label="Close configuration"
+          >
+            ×
+          </button>
+        </div>
+        <p class="muted">
+          A fresh population develops from these conditions. The same seed and
+          configuration reproduce the same run.
+        </p>
+        <div class="form-grid">
+          <label
+            >Random seed<input
+              name="seed"
+              type="number"
+              step="1"
+              min="0"
+              max="2147483647"
+              required
+              value="42" /></label
+          ><label
+            >Initial population<input
+              name="population"
+              type="number"
+              min="2"
+              max="48"
+              step="1"
+              required
+              value="18" /></label
+          ><label
+            >Evolution mode<select name="mode">
+              <option value="ecological">Ecological reproduction</option>
+              <option value="controlled">Controlled generations</option>
+            </select></label
+          ><label
+            >Lifetime learning<select name="learning">
+              <option value="none">Genetic only</option>
+              <option value="hebbian" selected>Hebbian</option>
+              <option value="reward">Reward-modulated Hebbian</option>
+            </select></label
+          ><label
+            >Food density <span class="field-unit">0–1</span
+            ><input
+              name="food_density"
+              type="number"
+              min="0"
+              max="1"
+              step="0.05"
+              required
+              value="0.65" /></label
+          ><label
+            >Temperature <span class="field-unit">0–1</span
+            ><input
+              name="temperature"
+              type="number"
+              min="0"
+              max="1"
+              step="0.05"
+              required
+              value="0.5" /></label
+          ><label
+            >Development nutrients <span class="field-unit">0.1–2</span
+            ><input
+              name="nutrients"
+              type="number"
+              min="0.1"
+              max="2"
+              step="0.1"
+              required
+              value="1" /></label
+          ><label
+            >Generation length <span class="field-unit">ticks</span
+            ><input
+              name="generation_ticks"
+              type="number"
+              min="10"
+              max="10000"
+              step="10"
+              required
+              value="600"
+          /></label>
+        </div>
+        <div class="dialog-footer">
+          <button type="button" id="cancel-config" class="button subtle">
+            Cancel</button
+          ><button type="submit" class="button primary">
+            Develop new world <span aria-hidden="true">↗</span>
+          </button>
+        </div>
+      </form>
+    </dialog>
+    <input
+      type="file"
+      id="snapshot-input"
+      accept=".json,.genrun,application/json"
+      hidden
+    />
+    <div id="toast" role="status" hidden></div>
+  </body>
+</html>
