@@ -1,0 +1,9 @@
+name: controlled_foraging
+seeds: {start: 1, end: 3}
+generations: 3
+config:
+  population: 8
+  generation_ticks: 300
+  learning: hebbian
+intervention:
+  learning: none

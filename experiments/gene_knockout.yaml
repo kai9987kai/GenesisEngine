@@ -1,0 +1,8 @@
+name: growth_gene_knockout
+seeds: {start: 1, end: 5}
+ticks: 300
+config:
+  population: 12
+  nutrients: 1.0
+intervention:
+  knockouts: [gene_000]

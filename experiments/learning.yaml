@@ -1,0 +1,9 @@
+name: lifetime_learning_ablation
+seeds: {start: 1, end: 5}
+ticks: 300
+config:
+  population: 12
+  learning: hebbian
+  food_density: 0.65
+intervention:
+  learning: none

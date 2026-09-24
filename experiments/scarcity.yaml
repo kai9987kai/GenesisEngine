@@ -1,0 +1,8 @@
+name: food_scarcity
+seeds: {start: 1, end: 5}
+ticks: 500
+config:
+  population: 12
+  food_density: 0.8
+intervention:
+  food_density: 0.2
